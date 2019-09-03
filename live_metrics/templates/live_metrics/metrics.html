@@ -1,0 +1,51 @@
+<!-- chat/templates/chat/room.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Metrics</title>
+    <script src="http://github.hubspot.com/odometer/odometer.js"></script>
+    <link rel="stylesheet" href="http://github.hubspot.com/odometer/themes/odometer-theme-default.css"/>
+
+</head>
+<body>
+Views: <p class="odometer" id="views">0</p>
+</body>
+<style>
+    body {
+        font-size: 2em;
+    }
+</style>
+<script>
+
+    const viewIncrease = () => {
+        const views = document.getElementById('views');
+        const odometer = new Odometer({
+            el: views,
+            value: 0,
+            format: '',
+            theme: 'default'
+        });
+
+        let viewsCount = 0;
+        //setInterval(() => odometer.update(viewsCount), 4000);
+        return (newViews) => {
+            viewsCount += newViews;
+            odometer.update(viewsCount)
+        };
+    };
+
+    window.onload = () => {
+        const increaseViews = viewIncrease();
+
+        let chatSocket = new WebSocket('ws://' + window.location.host + '/ws/live_metrics/' + 'lobby' + '/');
+
+        chatSocket.onmessage = (event) => {
+            const {newViews} = JSON.parse(event.data);
+            increaseViews(newViews);
+        };
+
+        chatSocket.onclose = console.error;
+    }
+</script>
+</html>
