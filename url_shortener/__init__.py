@@ -1,15 +1,27 @@
 import random
-import channels.layers
-
 import asyncio
 
+import channels
 
-async def reportView():
+from url_shortener.models.channel_tracker import ChannelTracker
+
+
+async def report_view():
+    tracker = ChannelTracker()
+
     channel_layer = channels.layers.get_channel_layer()
+    views = 0
     while True:
-        await channel_layer.group_send('chat_lobby', {'type': 'message', 'message': random.randint(1, 30)})
+        views += random.randint(1, 30)
+        payload = {
+            'type': 'message',
+            'message': {
+                'viewCount': views
+            }
+        }
+        await channel_layer.group_send('lobby', payload)
         await asyncio.sleep(random.randint(1, 5))
 
 
 loop = asyncio.get_event_loop()
-task = loop.create_task(reportView())
+task = loop.create_task(report_view())

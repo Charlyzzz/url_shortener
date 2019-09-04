@@ -27,12 +27,7 @@ Views: <p class="odometer" id="views">0</p>
             theme: 'default'
         });
 
-        let viewsCount = 0;
-        //setInterval(() => odometer.update(viewsCount), 4000);
-        return (newViews) => {
-            viewsCount += newViews;
-            odometer.update(viewsCount)
-        };
+        return odometer.update.bind(odometer)
     };
 
     window.onload = () => {
@@ -41,8 +36,10 @@ Views: <p class="odometer" id="views">0</p>
         let chatSocket = new WebSocket('ws://' + window.location.host + '/ws/live_metrics/' + 'lobby' + '/');
 
         chatSocket.onmessage = (event) => {
-            const {newViews} = JSON.parse(event.data);
-            increaseViews(newViews);
+            const payload = JSON.parse(event.data);
+            const {viewCount} = JSON.parse(event.data);
+            console.log(payload)
+            increaseViews(viewCount);
         };
 
         chatSocket.onclose = console.error;
